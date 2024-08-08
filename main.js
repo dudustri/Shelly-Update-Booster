@@ -1,29 +1,35 @@
 let connSettings = {
-    topic: "shellyUpdateBooster/",
-    qos: "1",
-    retain: "false",
-    postUrl: ""
-}
+    topic: 'shellyUpdateBooster/',
+    qos: 1,
+    retain: false,
+    postUrl: '',
+    updateTime: 500
+};
 
-// TODO: add an event handler to call publish NewSample instead of an infinite loop.
-function checkSampleChange(){
-    while(0){
+let timerId;
 
-    }
+function checkSampleChange() {
+    timerId = Timer.set(connSettings.updateTime, true, publishNewSample, null);
 }
 
 function publishNewSample() {
+    let deviceStatus = Shelly.getComponentStatus('em', 0);
 
-    let deviceStatus = Shelly.getComponentStatus("em", 0);
-    if (MQTT.isConnected()){
-        print("mqtt triggered");
-        MQTT.publish(connSettings.topic, deviceStatus, connSettings.qos, connSettings.retain);
+    if (MQTT.isConnected()) {
+        print('mqtt triggered');
+        MQTT.publish(connSettings.topic, JSON.stringify(deviceStatus), connSettings.qos, connSettings.retain);
+    } else if (connSettings.postUrl !== '') {
+        print('http triggered');
+        Shelly.call('HTTP.POST', {url: connSettings.postUrl, body: JSON.stringify(deviceStatus)}, function(result) {
+            print(JSON.stringify(result));
+        });
+    } else {
+        print("Connection problems... Clearing the timer and killing the script process.");
+        Timer.clear(timerId);
+        die("No connection stabilished!");
     }
-    else if (!config.post_url){
-        print("http triggered");
-        Shelly.call("HTTP.POST", {url: connSettings.postUrl}, deviceStatus);
-    }
-    print(deviceStatus);
+    //print(JSON.stringify(deviceStatus));
 }
 
-print (connSettings);
+checkSampleChange();
+print(JSON.stringify(connSettings));
