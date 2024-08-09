@@ -13,10 +13,11 @@ function checkSampleChange() {
 }
 
 function publishNewSample() {
+    let timestamp = Shelly.getComponentStatus("sys").unixtime;
     let deviceStatus = Shelly.getComponentStatus('em', 0);
-
+    deviceStatus.timestamp = timestamp;
+      
     if (MQTT.isConnected()) {
-        print('mqtt triggered');
         MQTT.publish(connSettings.topic, JSON.stringify(deviceStatus), connSettings.qos, connSettings.retain);
     } else if (connSettings.postUrl !== '') {
         print('http triggered');
@@ -28,7 +29,6 @@ function publishNewSample() {
         Timer.clear(timerId);
         die("No connection stabilished!");
     }
-    //print(JSON.stringify(deviceStatus));
 }
 
 checkSampleChange();
