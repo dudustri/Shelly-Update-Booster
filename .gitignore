@@ -1,1 +1,2 @@
 mqtt-broker/config/*
+data-collector/target/*
