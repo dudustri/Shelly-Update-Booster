@@ -1,12 +1,12 @@
 use rumqttc::{Client, Event, Incoming, MqttOptions, QoS};
-use crate::store::storage::Storage;
+use tokio::sync::mpsc;
 use std::time::Duration;
 
 pub async fn run_mqtt_client(
     broker_url: &str,
     topic: &str,
     port: u16,
-    storage: Box<dyn Storage>,
+    channel_sender: mpsc::Sender<String>
 ) {
     let mut mqttoptions = MqttOptions::new("bodil_data_collector", broker_url, port);
     mqttoptions.set_keep_alive(Duration::from_secs(20));
@@ -20,8 +20,8 @@ pub async fn run_mqtt_client(
             Ok(Event::Incoming(Incoming::Publish(publish))) => {
                 if let Ok(payload) = std::str::from_utf8(&publish.payload) {
                     println!("Received message: {}", payload);
-                    if let Err(e) = storage.store(payload).await {
-                        eprintln!("Failed to store message: {}", e);
+                    if let Err(e) = channel_sender.send(payload.to_string()).await {
+                        eprintln!("Failed to send message to the worker: {}", e);
                     }
                 }
             }

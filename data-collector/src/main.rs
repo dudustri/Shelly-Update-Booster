@@ -1,11 +1,14 @@
 mod config;
 mod client;
 mod store;
+mod consumer;
+
+use std::sync::Arc;
 
 use config::load_config;
 use store::init_storage;
 use client::run_mqtt_client;
-use tokio;
+use tokio::{self, sync::mpsc};
 
 #[tokio::main]
 async fn main() {
@@ -15,5 +18,10 @@ async fn main() {
         .await
         .expect("Failed to initialize storage");
 
-    run_mqtt_client(&config.broker_url, &config.topic, config.broker_port , storage).await;
+    let storage = Arc::new(storage);
+    
+    let (produce, consume) = mpsc::channel::<String>(100);
+    consumer::spawn_workers(consume, storage, config.consumers_amount).await;
+
+    run_mqtt_client(&config.broker_url, &config.topic, config.broker_port , produce).await;
 }
