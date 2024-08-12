@@ -21,7 +21,7 @@ async fn main() {
     let storage = Arc::new(storage);
     
     let (produce, consume) = mpsc::channel::<String>(100);
-    consumer::spawn_workers(consume, storage, config.consumers_amount).await;
+    consumer::spawn_consumers(consume, storage, config.consumers_amount).await;
 
     run_mqtt_client(&config.broker_url, &config.topic, config.broker_port , produce).await;
 }

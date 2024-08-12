@@ -4,7 +4,7 @@ use tokio::sync::{mpsc, Mutex};
 use crate::store::storage::Storage;
 use tokio::task;
 
-pub async fn spawn_workers(
+pub async fn spawn_consumers(
     consumer_queue: mpsc::Receiver<String>,
     storage: Arc<Box<dyn Storage>>,
     worker_count: u8,
@@ -18,6 +18,7 @@ pub async fn spawn_workers(
         let storage_clone = Arc::clone(&storage);
 
         task::spawn(async move {
+            println!("Consumer {} created!", thread_id);
             while let Some(payload) = {
                 let mut queue = queue_clone.lock().await;
                 queue.recv().await
