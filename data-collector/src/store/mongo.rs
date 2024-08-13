@@ -15,6 +15,8 @@ impl MongoStorage {
     }
 }
 
+//TODO: figure out if it should be stored one document per energy meter or a collection per energy meter!
+
 #[async_trait]
 impl Storage for MongoStorage {
     async fn store(&self, message: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
