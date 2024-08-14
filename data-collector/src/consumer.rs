@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use tokio::sync::{mpsc, Mutex};
-use crate::store::storage::Storage;
+use crate::{models::store_task_message::Message, store::storage::Storage};
 use tokio::task;
 
 pub async fn spawn_consumers(
-    consumer_queue: mpsc::Receiver<String>,
+    consumer_queue: mpsc::Receiver<Message>,
     storage: Arc<Box<dyn Storage>>,
     worker_count: u8,
 ) {
@@ -19,12 +19,12 @@ pub async fn spawn_consumers(
 
         task::spawn(async move {
             println!("Consumer {} created!", thread_id);
-            while let Some(payload) = {
+            while let Some(task_message) = {
                 let mut queue = queue_clone.lock().await;
                 queue.recv().await
             } {
                 println!("Thread: {} consumed from the queue and is processing the storage...", thread_id);
-                if let Err(e) = storage_clone.store(&payload).await {
+                if let Err(e) = storage_clone.store(&task_message.collection, &task_message.payload).await {
                     eprintln!("Failed to store message: {}", e);
                 }
             }

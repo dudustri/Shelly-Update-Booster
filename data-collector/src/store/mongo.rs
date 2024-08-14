@@ -1,28 +1,35 @@
 use mongodb::{Client as MongoClient, Collection, bson::Document};
 use async_trait::async_trait;
+use std::error::Error;
 use crate::store::storage::Storage;
 
 pub struct MongoStorage {
-    collection: Collection<Document>,
+    client: MongoClient,
+    db: String,
 }
 
 impl MongoStorage {
-    pub async fn new(uri: &str, db: &str, collection: &str) -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
+    pub async fn new(uri: &str, db: &str) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let client = MongoClient::with_uri_str(uri).await?;
         println!("Connecting to the db!");
-        let collection = client.database(db).collection(collection);
-        Ok(Self { collection })
+        Ok(Self {
+            client,
+            db: db.to_string(),
+        })
+    }
+
+    fn get_collection(&self, collection_name: &str) -> Collection<Document> {
+        self.client.database(&self.db).collection(collection_name)
     }
 }
 
-//TODO: figure out if it should be stored one document per energy meter or a collection per energy meter!
-
 #[async_trait]
 impl Storage for MongoStorage {
-    async fn store(&self, message: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    async fn store(&self, collection_name: &str, message: &str) -> Result<(), Box<dyn Error + Send + Sync>> {
         let json_value: Document = serde_json::from_str(message)?;
+        let collection = self.get_collection(collection_name);
         println!("Inserting into the database: {}", message);
-        self.collection.insert_one(json_value).await?;
+        collection.insert_one(json_value).await?;
         Ok(())
     }
 }

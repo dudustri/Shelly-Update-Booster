@@ -7,7 +7,7 @@ pub struct Config {
     pub topic: String,
     pub mongo_uri: String,
     pub mongo_db: String,
-    pub mongo_collection: String,
+    // pub mongo_collection: String,
     pub consumers_amount: u8,
 }
 
@@ -20,7 +20,7 @@ pub fn load_config() -> Config {
         topic: env::var("MQTT_TOPIC").unwrap_or_else(|_| "shellyUpdateBooster/#".to_string()),
         mongo_uri: env::var("MONGO_URI").expect("MONGO_URI must be set"),
         mongo_db: env::var("MONGO_DB").expect("MONGO_DB must be set"),
-        mongo_collection: env::var("MONGO_COLLECTION").expect("MONGO_COLLECTION must be set"),
+        // mongo_collection: env::var("MONGO_COLLECTION").expect("MONGO_COLLECTION must be set"),
         consumers_amount: env::var("CONSUMERS_AMOUNT").unwrap_or_else(|_|  "5".to_string()).parse::<u8>().expect("CONSUMER_AMOUNT should be a uint 8"),
     }
 }

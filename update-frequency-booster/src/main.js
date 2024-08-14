@@ -1,5 +1,6 @@
+// the collection name in the database will follow the topic structure after 'shellyUpdateBooster/'
 let connSettings = {
-    topic: 'shellyUpdateBooster/',
+    topic: 'shellyUpdateBooster/office',
     qos: 1,
     retain: false,
     postUrl: '',
