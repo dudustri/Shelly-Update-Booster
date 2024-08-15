@@ -22,24 +22,8 @@ pub async fn spawn_consumers(
         let storage_clone = Arc::clone(&storage);
 
         task::spawn(run_consumer(thread_id, consumer_queue_clone, producer_queue_clone, storage_clone));
-
-        // task::spawn(async move {
-        //     println!("Consumer {} created!", thread_id);
-        //     while let Some(task_message) = {
-        //         let mut queue = queue_clone.lock().await;
-        //         queue.recv().await
-        //     } {
-        //         println!("Thread: {} consumed from the queue and is processing the storage...", thread_id);
-        //         if let Err(e) = storage_clone.store(&task_message.collection, &task_message.payload).await {
-        //             eprintln!("Failed to store message: {}", e);
-        //         }
-        //     }
-        //     println!("Worker with id {} shutting down because the channel was closed.", thread_id);
-        // });
-
     }
 }
-
 
 async fn process_message(
     storage: Arc<Box<dyn Storage>>,

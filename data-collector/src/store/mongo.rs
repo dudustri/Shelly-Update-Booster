@@ -8,6 +8,7 @@ pub struct MongoStorage {
     db: String,
 }
 
+// TODO: implement connection error handler
 impl MongoStorage {
     pub async fn new(uri: &str, db: &str) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let client = MongoClient::with_uri_str(uri).await?;

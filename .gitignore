@@ -1,3 +1,4 @@
 mqtt-broker/config/*
 data-collector/target/*
 local-database/mongodata/*
+data-collector/.env

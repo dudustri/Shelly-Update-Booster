@@ -4,6 +4,8 @@ use std::time::Duration;
 
 use crate::models::message::StoreTaskMessage;
 
+
+// TODO: separate the connection in a different function and implement connection error handling before enter in the connection event loop.
 pub async fn run_mqtt_client(
     broker_url: &str,
     topic: &str,
