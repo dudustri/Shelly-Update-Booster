@@ -28,7 +28,7 @@ impl Storage for MongoStorage {
     async fn store(&self, collection_name: &str, message: &str) -> Result<(), Box<dyn Error + Send + Sync>> {
         let json_value: Document = serde_json::from_str(message)?;
         let collection = self.get_collection(collection_name);
-        println!("Inserting into the database: {}", message);
+        // println!("Inserting into the database: {}", message);
         collection.insert_one(json_value).await?;
         Ok(())
     }

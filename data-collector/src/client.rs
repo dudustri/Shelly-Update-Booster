@@ -2,13 +2,13 @@ use rumqttc::{Client, Event, Incoming, MqttOptions, QoS};
 use tokio::sync::mpsc;
 use std::time::Duration;
 
-use crate::models::store_task_message::Message;
+use crate::models::message::StoreTaskMessage;
 
 pub async fn run_mqtt_client(
     broker_url: &str,
     topic: &str,
     port: u16,
-    queue: mpsc::Sender<Message>
+    queue: mpsc::Sender<StoreTaskMessage>
 ) {
     let mut mqttoptions = MqttOptions::new("bodil_data_collector", broker_url, port);
     mqttoptions.set_keep_alive(Duration::from_secs(20));
@@ -21,12 +21,11 @@ pub async fn run_mqtt_client(
         match connection.eventloop.poll().await {
             Ok(Event::Incoming(Incoming::Publish(packet))) => {
                 if let Ok(payload) = std::str::from_utf8(&packet.payload){
-                    println!("Received message: {} - from topic: {}", payload, &packet.topic);
-                    //Create the message struct here passing the topic and the payload. Send it to the queue.
+                    // println!("Received message: {} - from topic: {}", payload, &packet.topic);
                     match extract_collection_from_topic_after_wildcard(topic, &packet.topic){
                         Ok(collection) => {
                             println!("Extracted collection: {}", collection);
-                            let store_message = Message{
+                            let store_message = StoreTaskMessage{
                                 collection: collection,
                                 payload: payload.to_string(),
                             };
@@ -64,6 +63,3 @@ fn extract_collection_from_topic_after_wildcard(topic_wildcard: &str, topic_rece
         return Err("Error: wildcard must be at the end of topic_wildcard.".to_string());
     }
 }
-
-
-

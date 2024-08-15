@@ -1,1 +1,1 @@
-pub mod store_task_message;
+pub mod message;
